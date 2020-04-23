@@ -1,4 +1,4 @@
-package thinkLog
+package logsim
 
 // 1.输出方法与标准库一致
 // 2.允许部分级别的日志不输出

@@ -1,4 +1,4 @@
-package thinkLog
+package logsim
 
 import (
 	"context"
