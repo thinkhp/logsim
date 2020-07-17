@@ -9,6 +9,13 @@ import (
 	"time"
 )
 
+func TestName(t *testing.T) {
+	fmt.Println(getFileNamePrefix(Day))
+	fmt.Println(getFileNamePrefix(time.Hour))
+	fmt.Println(getFileNamePrefix(time.Minute))
+	fmt.Println(getFileNamePrefix(time.Second))
+}
+
 func TestLog(t *testing.T) {
 	SetLevelNotPrint(InfoLevel)
 	SetLevelRedirect(TraceLevel, DebugLevel)

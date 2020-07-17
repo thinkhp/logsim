@@ -114,18 +114,20 @@ func getNextTime(duration time.Duration) time.Time {
 	return next
 }
 
+const timeFormat = "20060102T150405"
 func getFileNamePrefix(duration time.Duration) string {
 	var fileNameUnSuffix string
 	now := time.Now()
+
 	switch duration {
 	case Day: // 日志的密度以天为单位
-		fileNameUnSuffix = now.Format(time.RFC3339)[:10]
+		fileNameUnSuffix = now.Format(timeFormat)[:8]
 	case Hour: // 日志的密度以小时为单位
-		fileNameUnSuffix = now.Format(time.RFC3339)[:13]
+		fileNameUnSuffix = now.Format(timeFormat)[:11]
 	case Minute: // 日志的密度以分钟为单位
-		fileNameUnSuffix = now.Format(time.RFC3339)[:16]
+		fileNameUnSuffix = now.Format(timeFormat)[:13]
 	case Second: // 日志的密度以秒为单位
-		fileNameUnSuffix = now.Format(time.RFC3339)[:19]
+		fileNameUnSuffix = now.Format(timeFormat)[:15]
 	default:
 		panic(fmt.Errorf("please use duration:day/hour/minute/second"))
 	}
