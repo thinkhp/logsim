@@ -1,8 +1,8 @@
 package logsim
 
 // 1.输出方法与标准库一致
-// 2.允许部分级别的日志不输出
-// 3.允许部分级别的日志输出到相同文件中
+// 2.可设置部分级别的日志不输出
+// 3.可设置部分级别的日志输出到相同文件中
 // 4.日志切割,级别为:天,时,分钟,秒
 // TODO 5.日志传送到server
 // TODO 6.以 json 或者 text 的形式输出
@@ -44,32 +44,15 @@ func (devNull) Close() error {
 	return nil
 }
 
-type Logger interface {
-	Printf(format string, v ...interface{})
-	Print(v ...interface{})
-	Println(v ...interface{})
-	Fatal(v ...interface{})
-	Fatalf(format string, v ...interface{})
-	Fatalln(v ...interface{})
-	Panic(v ...interface{})
-	Panicf(format string, v ...interface{})
-	Panicln(v ...interface{})
-}
-
-type iLogger struct {
+type SimLogger struct {
 	levelPrint level
 	levelFile  level
 	*log.Logger
 }
 
 //定义logger, 传入参数 文件，前缀字符串，flag标记
-func New(lv level, out io.Writer, prefix string, flag int) *iLogger {
-	l := new(iLogger)
-	l.levelPrint = lv
-	l.levelFile = lv
-	l.Logger = log.New(out, prefix, flag)
-
-	return l
+func New(lv level, out io.Writer, prefix string, flag int) *SimLogger {
+	return &SimLogger{levelFile: lv, levelPrint: lv, Logger:log.New(out, prefix, flag)}
 }
 
 var cfgLogPath = defaultLogPath
@@ -91,24 +74,24 @@ func SetLevelNotPrint(ls ...level) {
 	for _, v := range ls {
 		switch v {
 		case TraceLevel:
-			TraceLog.(*iLogger).SetOutput(stdNull)
+			TraceLog.SetOutput(stdNull)
 		case PanicLevel:
 		case FatalLevel:
 		case ErrorLevel:
-			ErrorLog.(*iLogger).SetOutput(stdNull)
+			ErrorLog.SetOutput(stdNull)
 		case WarnLevel:
-			WarnLog.(*iLogger).SetOutput(stdNull)
+			WarnLog.SetOutput(stdNull)
 		case InfoLevel:
-			InfoLog.(*iLogger).SetOutput(stdNull)
+			InfoLog.SetOutput(stdNull)
 		case DebugLevel:
-			DebugLog.(*iLogger).SetOutput(stdNull)
+			DebugLog.SetOutput(stdNull)
 		}
 	}
 }
 
 // 将 src 级别的日志输出到 redirect 级别的日志文件
 func SetLevelRedirect(src, redirect level) {
-	allLog[src].(*iLogger).levelFile = redirect
+	allLog[src].levelFile = redirect
 }
 
 var allLevel = []level{
@@ -120,13 +103,13 @@ var allLevel = []level{
 	DebugLevel,
 	TraceLevel,
 }
-var allLog map[level]Logger
+var allLog map[level]*SimLogger
 
-var TraceLog Logger
-var DebugLog Logger
-var InfoLog Logger
-var WarnLog Logger
-var ErrorLog Logger
+var TraceLog *SimLogger
+var DebugLog *SimLogger
+var InfoLog *SimLogger
+var WarnLog *SimLogger
+var ErrorLog *SimLogger
 
 func init() {
 	TraceLog = New(TraceLevel, os.Stdout, "[TRACE] ", cfgFlags)
@@ -135,7 +118,7 @@ func init() {
 	WarnLog = New(WarnLevel, os.Stdout, "[WARN ] ", cfgFlags)
 	ErrorLog = New(ErrorLevel, os.Stderr, "[ERROR] ", cfgFlags)
 
-	allLog = map[level]Logger{
+	allLog = map[level]*SimLogger{
 		ErrorLevel: ErrorLog,
 		WarnLevel:  WarnLog,
 		InfoLevel:  InfoLog,

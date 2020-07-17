@@ -16,6 +16,7 @@ const Second = time.Second
 var allLogFile = make(map[level]*os.File)
 
 func SetLogRotateTask(d time.Duration) {
+	SetLogPath(cfgLogPath)
 	allLogRotate(d)
 	go func() {
 		defer func() {
@@ -40,15 +41,14 @@ func logRotateTask(duration time.Duration) {
 }
 
 func allLogRotate(duration time.Duration) {
-	SetLogPath(defaultLogPath)
 	// create all new output file
 	// get all redirect level
 	reLvs := make(map[level]bool)
 	for _, l := range allLog {
-		if l.(*iLogger).Logger.Writer() == stdNull {
+		if l.Logger.Writer() == stdNull {
 			continue
 		}
-		reLvs[l.(*iLogger).levelFile] = true
+		reLvs[l.levelFile] = true
 	}
 	// create all redirect level file
 	for k, _ := range reLvs {
@@ -56,7 +56,7 @@ func allLogRotate(duration time.Duration) {
 	}
 	for _, l := range allLog {
 		// set new output and close old output
-		l.(*iLogger).logRotate()
+		l.logRotate()
 	}
 }
 
@@ -76,7 +76,7 @@ func createNewOutput(redirectLv level, duration time.Duration) *os.File {
 	return newOutput
 }
 
-func (l *iLogger) logRotate() {
+func (l *SimLogger) logRotate() {
 	oldOutput := l.Writer()
 	defer func() {
 		if r := recover(); r != nil {
