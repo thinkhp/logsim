@@ -9,6 +9,7 @@ package logsim
 // TODO 7.print() runtime.Call(1)
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -44,15 +45,60 @@ func (devNull) Close() error {
 	return nil
 }
 
+type HookFunc func(v string)
 type SimLogger struct {
 	levelPrint level
 	levelFile  level
-	*log.Logger
+	handlersChain []HookFunc
+	logger *log.Logger
+
+}
+
+func (l *SimLogger)AddHook(hook HookFunc)  {
+	l.handlersChain = append(l.handlersChain, hook)
+}
+func (l *SimLogger)Println(v ...interface{}) {
+	s := fmt.Sprint(v...)
+	for _, f := range l.handlersChain {
+		f(s)
+	}
+	l.logger.Println(s)
+}
+func (l *SimLogger)Print(v ...interface{}) {
+	s := fmt.Sprint(v...)
+	for _, f := range l.handlersChain {
+		f(s)
+	}
+	l.logger.Print(s)
+}
+func (l *SimLogger)Printf(format string, v ...interface{}) {
+	s := fmt.Sprintf(format, v...)
+	for _, f := range l.handlersChain {
+		f(s)
+	}
+	l.logger.Print(s)
+}
+func (l *SimLogger)Panic(v ...interface{}) {
+	s := fmt.Sprint(v...)
+	for _, f := range l.handlersChain {
+		f(s)
+	}
+	l.logger.Panic(s)
+
+}
+func (l *SimLogger)Fatal(v ...interface{})  {
+	s := fmt.Sprint(v...)
+	for _, f := range l.handlersChain {
+		f(s)
+	}
+	l.logger.Fatal(s)
 }
 
 //定义logger, 传入参数 文件，前缀字符串，flag标记
 func New(lv level, out io.Writer, prefix string, flag int) *SimLogger {
-	return &SimLogger{levelFile: lv, levelPrint: lv, Logger:log.New(out, prefix, flag)}
+	l := &SimLogger{levelFile: lv, levelPrint: lv, logger:log.New(out, prefix, flag)}
+	l.handlersChain = make([]HookFunc, 0)
+	return l
 }
 
 var cfgLogPath = defaultLogPath
@@ -74,17 +120,17 @@ func SetLevelNotPrint(ls ...level) {
 	for _, v := range ls {
 		switch v {
 		case TraceLevel:
-			TraceLog.SetOutput(stdNull)
+			TraceLog.logger.SetOutput(stdNull)
 		case PanicLevel:
 		case FatalLevel:
 		case ErrorLevel:
-			ErrorLog.SetOutput(stdNull)
+			ErrorLog.logger.SetOutput(stdNull)
 		case WarnLevel:
-			WarnLog.SetOutput(stdNull)
+			WarnLog.logger.SetOutput(stdNull)
 		case InfoLevel:
-			InfoLog.SetOutput(stdNull)
+			InfoLog.logger.SetOutput(stdNull)
 		case DebugLevel:
-			DebugLog.SetOutput(stdNull)
+			DebugLog.logger.SetOutput(stdNull)
 		}
 	}
 }

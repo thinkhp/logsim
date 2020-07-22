@@ -45,7 +45,7 @@ func allLogRotate(duration time.Duration) {
 	// get all redirect level
 	reLvs := make(map[level]bool)
 	for _, l := range allLog {
-		if l.Logger.Writer() == stdNull {
+		if l.logger.Writer() == stdNull {
 			continue
 		}
 		reLvs[l.levelFile] = true
@@ -77,10 +77,10 @@ func createNewOutput(redirectLv level, duration time.Duration) *os.File {
 }
 
 func (l *SimLogger) logRotate() {
-	oldOutput := l.Writer()
+	oldOutput := l.logger.Writer()
 	defer func() {
 		if r := recover(); r != nil {
-			l.SetOutput(oldOutput)
+			l.logger.SetOutput(oldOutput)
 			ErrorLog.Printf("[recover] 日志已恢复,文件均指向标准输出%+v\n", r)
 		}
 	}()
@@ -88,7 +88,7 @@ func (l *SimLogger) logRotate() {
 		return
 	}
 	// set new output and close old output
-	l.SetOutput(allLogFile[l.levelFile])
+	l.logger.SetOutput(allLogFile[l.levelFile])
 	switch oldOutput {
 	case os.Stdout, os.Stderr, stdNull:
 	default:

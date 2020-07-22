@@ -3,7 +3,9 @@ package logsim
 import (
 	"context"
 	"fmt"
+	"log"
 	"math/rand"
+	"os"
 	"strconv"
 	"testing"
 	"time"
@@ -51,5 +53,18 @@ func TestSetLogFileTask(t *testing.T) {
 		i++
 		DebugLog.Println(`test`, strconv.Itoa(i))
 		time.Sleep(time.Millisecond * 100)
+	}
+}
+
+func TestSimLogger_AddHook(t *testing.T) {
+	logger := log.New(os.Stdout, "[HOOK]", log.LstdFlags)
+	hook := func(v ...interface{}) {
+		logger.Println(v...)
+	}
+	TraceLog.AddHook(hook)
+
+	for i := 0; i < 10; i++ {
+		TraceLog.Println("test test test")
+		time.Sleep(time.Second*time.Duration(i))
 	}
 }
