@@ -58,11 +58,11 @@ func (l *SimLogger)AddHook(hook HookFunc)  {
 	l.handlersChain = append(l.handlersChain, hook)
 }
 func (l *SimLogger)Println(v ...interface{}) {
-	s := fmt.Sprint(v...)
+	s := fmt.Sprintln(v...)
 	for _, f := range l.handlersChain {
 		f(s)
 	}
-	l.logger.Println(s)
+	l.logger.Print(s)
 }
 func (l *SimLogger)Print(v ...interface{}) {
 	s := fmt.Sprint(v...)

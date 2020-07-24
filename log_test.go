@@ -58,13 +58,16 @@ func TestSetLogFileTask(t *testing.T) {
 
 func TestSimLogger_AddHook(t *testing.T) {
 	logger := log.New(os.Stdout, "[HOOK]", log.LstdFlags)
-	hook := func(v ...interface{}) {
-		logger.Println(v...)
+	f, _ := os.OpenFile("tmp.log", os.O_CREATE|os.O_TRUNC|os.O_RDWR, 0660)
+	hook := func(s string) {
+		logger.Println(s)
+		f.WriteString(s)
 	}
 	TraceLog.AddHook(hook)
 
 	for i := 0; i < 10; i++ {
-		TraceLog.Println("test test test")
+		TraceLog.logger.Println("test", "test", "test")
+		TraceLog.Println("test", "test", "test")
 		time.Sleep(time.Second*time.Duration(i))
 	}
 }
