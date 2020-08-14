@@ -66,8 +66,11 @@ func TestSimLogger_AddHook(t *testing.T) {
 	TraceLog.AddHook(hook)
 
 	for i := 0; i < 10; i++ {
-		TraceLog.logger.Println("test", "test", "test")
+		//TraceLog.logger.Println("test", "test", "test")
 		TraceLog.Println("test", "test", "test")
-		time.Sleep(time.Second*time.Duration(i))
+		time.Sleep(time.Millisecond * 100)
 	}
+	TraceLog.Printf("%v", "printf")
+	TraceLog.Print("print", "\n")
+	TraceLog.Panic("test", "test", "test")
 }

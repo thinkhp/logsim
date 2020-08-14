@@ -115,6 +115,7 @@ func getNextTime(duration time.Duration) time.Time {
 }
 
 const timeFormat = "20060102T150405"
+
 func getFileNamePrefix(duration time.Duration) string {
 	var fileNameUnSuffix string
 	now := time.Now()

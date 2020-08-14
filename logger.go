@@ -47,56 +47,57 @@ func (devNull) Close() error {
 
 type HookFunc func(v string)
 type SimLogger struct {
-	levelPrint level
-	levelFile  level
+	levelPrint    level
+	levelFile     level
 	handlersChain []HookFunc
-	logger *log.Logger
-
+	logger        *log.Logger
 }
 
-func (l *SimLogger)AddHook(hook HookFunc)  {
+func (l *SimLogger) AddHook(hook HookFunc) {
 	l.handlersChain = append(l.handlersChain, hook)
 }
-func (l *SimLogger)Println(v ...interface{}) {
+func (l *SimLogger) Println(v ...interface{}) {
 	s := fmt.Sprintln(v...)
 	for _, f := range l.handlersChain {
 		f(s)
 	}
-	l.logger.Print(s)
+	l.logger.Output(2, s)
 }
-func (l *SimLogger)Print(v ...interface{}) {
+func (l *SimLogger) Print(v ...interface{}) {
 	s := fmt.Sprint(v...)
 	for _, f := range l.handlersChain {
 		f(s)
 	}
-	l.logger.Print(s)
+	l.logger.Output(2, s)
 }
-func (l *SimLogger)Printf(format string, v ...interface{}) {
+func (l *SimLogger) Printf(format string, v ...interface{}) {
 	s := fmt.Sprintf(format, v...)
 	for _, f := range l.handlersChain {
 		f(s)
 	}
-	l.logger.Print(s)
+	l.logger.Output(2, s)
 }
-func (l *SimLogger)Panic(v ...interface{}) {
+func (l *SimLogger) Panic(v ...interface{}) {
 	s := fmt.Sprint(v...)
 	for _, f := range l.handlersChain {
 		f(s)
 	}
-	l.logger.Panic(s)
+	l.logger.Output(2, s)
+	panic(s)
 
 }
-func (l *SimLogger)Fatal(v ...interface{})  {
+func (l *SimLogger) Fatal(v ...interface{}) {
 	s := fmt.Sprint(v...)
 	for _, f := range l.handlersChain {
 		f(s)
 	}
-	l.logger.Fatal(s)
+	l.logger.Output(2, s)
+	os.Exit(1)
 }
 
 //定义logger, 传入参数 文件，前缀字符串，flag标记
 func New(lv level, out io.Writer, prefix string, flag int) *SimLogger {
-	l := &SimLogger{levelFile: lv, levelPrint: lv, logger:log.New(out, prefix, flag)}
+	l := &SimLogger{levelFile: lv, levelPrint: lv, logger: log.New(out, prefix, flag)}
 	l.handlersChain = make([]HookFunc, 0)
 	return l
 }
