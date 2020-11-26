@@ -30,7 +30,7 @@ const (
 const (
 	//defaultOutput = os.Stdout
 	defaultLevel   = TraceLevel
-	defaultFlags   = log.LstdFlags | log.Lshortfile
+	defaultFlags   = log.Ldate | log.Lmicroseconds | log.Lshortfile
 	defaultLogPath = "./log/"
 )
 
