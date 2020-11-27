@@ -11,11 +11,27 @@ import (
 	"time"
 )
 
-func TestName(t *testing.T) {
+func TestFileNamePrefix(t *testing.T) {
 	fmt.Println(getFileNamePrefix(Day))
 	fmt.Println(getFileNamePrefix(time.Hour))
 	fmt.Println(getFileNamePrefix(time.Minute))
 	fmt.Println(getFileNamePrefix(time.Second))
+}
+
+func TestSetLevelNotPrint(t *testing.T) {
+	InfoLog.Println("must print")
+	SetLevelNotPrint(InfoLevel)
+	InfoLog.Println("must not print")
+}
+
+func TestSetLogFlags(t *testing.T) {
+	TraceLog.Println("l time")
+	SetLogFlags(log.Ldate | log.Lmicroseconds | log.Lshortfile)
+	TraceLog.Println("l microseconds")
+}
+
+func TestSetLevelRedirect(t *testing.T) {
+	SetLevelRedirect(PanicLevel, PanicLevel)
 }
 
 func TestLog(t *testing.T) {
