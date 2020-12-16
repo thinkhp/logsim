@@ -47,6 +47,7 @@ func (devNull) Close() error {
 
 type HookFunc func(v string)
 type SimLogger struct {
+	writer        io.Writer
 	levelPrint    level       //日志级别
 	levelFile     level       //日志的输出文件 $level.log
 	handlersChain []HookFunc  //钩子
@@ -56,6 +57,7 @@ type SimLogger struct {
 // 定义logger, 传入参数:日志级别, 输出文件，前缀字符串，flag标记
 func New(lv level, out io.Writer, prefix string, flag int) *SimLogger {
 	l := &SimLogger{levelFile: lv, levelPrint: lv, logger: log.New(out, prefix, flag)}
+	l.writer = out
 	l.handlersChain = make([]HookFunc, 0)
 	return l
 }
@@ -136,6 +138,15 @@ func checkFile(filename string) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (l *SimLogger) Writer() io.Writer {
+	return l.writer
+}
+
+func (l *SimLogger) SetOutput(w io.Writer) {
+	l.writer = w
+	l.logger.SetOutput(w)
 }
 
 func (l *SimLogger) AddHook(hook HookFunc) {

@@ -12,10 +12,10 @@ import (
 )
 
 func TestFileNamePrefix(t *testing.T) {
-	fmt.Println(getFileNamePrefix(Day))
-	fmt.Println(getFileNamePrefix(time.Hour))
-	fmt.Println(getFileNamePrefix(time.Minute))
-	fmt.Println(getFileNamePrefix(time.Second))
+	t.Log(getFileNamePrefix(Day))
+	t.Log(getFileNamePrefix(time.Hour))
+	t.Log(getFileNamePrefix(time.Minute))
+	t.Log(getFileNamePrefix(time.Second))
 }
 
 func TestSetLevelNotPrint(t *testing.T) {
@@ -50,7 +50,7 @@ func TestLog(t *testing.T) {
 		case <-ctx.Done():
 			return
 		default:
-			fmt.Println(DebugLog)
+			t.Log(fmt.Sprintf("%+v", DebugLog))
 			TraceLog.Println(i, time.Now().Format(time.RFC3339))
 			InfoLog.Println(i, time.Now().Format(time.RFC3339))
 			WarnLog.Println(i, time.Now().Format(time.RFC3339))
@@ -65,10 +65,20 @@ func TestLog(t *testing.T) {
 func TestSetLogFileTask(t *testing.T) {
 	var i int
 	SetLogRotateTask(time.Second)
+	rand.Seed(time.Now().UnixNano())
+	r := rand.Intn(10)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(r))
+	defer cancel()
 	for true {
-		i++
-		DebugLog.Println(`test`, strconv.Itoa(i))
-		time.Sleep(time.Millisecond * 100)
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			i++
+			DebugLog.Println("test", strconv.Itoa(i))
+			ErrorLog.Println("test", strconv.Itoa(i))
+			time.Sleep(time.Millisecond * 100)
+		}
 	}
 }
 
@@ -76,17 +86,25 @@ func TestSimLogger_AddHook(t *testing.T) {
 	logger := log.New(os.Stdout, "[HOOK]", log.LstdFlags)
 	f, _ := os.OpenFile("tmp.log", os.O_CREATE|os.O_TRUNC|os.O_RDWR, 0660)
 	hook := func(s string) {
-		logger.Println(s)
+		logger.Print(s)
 		f.WriteString(s)
 	}
 	TraceLog.AddHook(hook)
 
 	for i := 0; i < 10; i++ {
-		//TraceLog.logger.Println("test", "test", "test")
 		TraceLog.Println("test", "test", "test")
 		time.Sleep(time.Millisecond * 100)
 	}
 	TraceLog.Printf("%v", "printf")
 	TraceLog.Print("print", "\n")
-	TraceLog.Panic("test", "test", "test")
+	func() {
+		defer func() {
+			if r := recover(); r != nil {
+				t.Log("recover, 符合预期")
+			} else {
+				panic("未 recover, 符合预期")
+			}
+		}()
+		TraceLog.Panic("test", "test", "test")
+	}()
 }
