@@ -140,6 +140,10 @@ func checkFile(filename string) {
 	}
 }
 
+func (l *SimLogger) SetPrefix(prefix string) {
+	l.logger.SetPrefix(prefix)
+}
+
 func (l *SimLogger) Writer() io.Writer {
 	return l.writer
 }

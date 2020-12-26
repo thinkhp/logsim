@@ -108,3 +108,64 @@ func TestSimLogger_AddHook(t *testing.T) {
 		TraceLog.Panic("test", "test", "test")
 	}()
 }
+
+//BenchmarkLogger/logrus
+//BenchmarkLogger/logrus-8         	   75589	     13617 ns/op
+//BenchmarkLogger/simlog
+//BenchmarkLogger/simlog-8         	  108032	     10842 ns/op
+//BenchmarkLogger/logger
+//BenchmarkLogger/logger-8         	  116841	     10475 ns/op
+func BenchmarkLogger(b *testing.B) {
+	b.Run("simlog", func(b *testing.B) {
+		f, err := os.OpenFile("simlog.log", os.O_TRUNC|os.O_CREATE|os.O_RDWR, 0660)
+		if err != nil {
+			b.Error(err)
+			return
+		}
+		DebugLog.SetOutput(f)
+		TraceLog.SetOutput(f)
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			//logsim.DebugLog.AddHook(func(v string) {
+			//	logsim.DebugLog.Print("[tracerID]")
+			//})
+			DebugLog.Println("hello")
+			TraceLog.Printf("%s\n", "hello f")
+		}
+		b.StopTimer()
+	})
+
+	b.Run("logger", func(b *testing.B) {
+		f, err := os.OpenFile("std.log", os.O_TRUNC|os.O_CREATE|os.O_RDWR, 0660)
+		if err != nil {
+			b.Error(err)
+			return
+		}
+		logger := log.New(f, "[DEBUG]", log.Lshortfile|log.LstdFlags)
+		logger2 := log.New(f, "[TRACE]", log.Lshortfile|log.LstdFlags)
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			logger.Println("hello")
+			logger2.Printf("%s\n", "hello f")
+		}
+		b.StopTimer()
+	})
+
+	//b.Run("logrus", func(b *testing.B) {
+	//	f, err := os.OpenFile("logrus.log", os.O_TRUNC|os.O_CREATE|os.O_RDWR, 0660)
+	//	if err != nil {
+	//		b.Error(err)
+	//		return
+	//	}
+	//	logrus.SetOutput(f)
+	//	//logrus.SetReportCaller(true)
+	//	logrus.SetLevel(logrus.DebugLevel)
+	//	logrus.SetLevel(logrus.TraceLevel)
+	//	b.ResetTimer()
+	//	for i := 0; i < b.N; i++ {
+	//		logrus.Debugln("hello")
+	//		logrus.Tracef("%s\n", "hello f")
+	//	}
+	//	b.StopTimer()
+	//})
+}
